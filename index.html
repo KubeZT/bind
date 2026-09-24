@@ -196,6 +196,7 @@ esac
 mkdir -p "$TOOLS_BIN"
 chmod 0700 "$KUBEZT_DIR/tools" "$TOOLS_BIN"
 JQ_BIN=$(type -P jq || true)
+JQ_BIN=$(command -v jq || true)
 if [ -z "$JQ_BIN" ]; then
 JQ_BIN="$TOOLS_BIN/jq"
 if [ ! -x "$JQ_BIN" ]; then
@@ -227,21 +228,52 @@ exit 1
 }
 SERVER_MAJOR=${BASH_REMATCH[1]}
 SERVER_MINOR=${BASH_REMATCH[2]}
+case "$KUBERNETES_VERSION" in
+[0-9]*.[0-9]*.[0-9]*) ;;
+*)
+echo "Invalid Kubernetes version in the topology." >&2
+exit 1
+;;
+esac
+SERVER_MAJOR=${KUBERNETES_VERSION%%.*}
+SERVER_REST=${KUBERNETES_VERSION#*.}
+SERVER_MINOR=${SERVER_REST%%.*}
+case "$SERVER_MAJOR:$SERVER_MINOR" in
+*[!0-9:]*|:|*:)
+echo "Invalid Kubernetes version in the topology." >&2
+exit 1
+;;
+esac
 
 compatible_kubectl() {
 local version minor_difference
+local version client_major client_rest client_minor minor_difference
 [ -x "$1" ] || return 1
 version=$("$1" version --client --output=json 2>/dev/null |
 "$JQ_BIN" -er '.clientVersion.gitVersion') || return 1
 [[ "$version" =~ ^v([0-9]+)\.([0-9]+)\. ]] || return 1
 [ "${BASH_REMATCH[1]}" = "$SERVER_MAJOR" ] || return 1
 minor_difference=$((10#${BASH_REMATCH[2]} - 10#$SERVER_MINOR))
+version=${version#v}
+case "$version" in
+[0-9]*.[0-9]*.*) ;;
+*) return 1 ;;
+esac
+client_major=${version%%.*}
+client_rest=${version#*.}
+client_minor=${client_rest%%.*}
+case "$client_major:$client_minor" in
+*[!0-9:]*|:|*:) return 1 ;;
+esac
+[ "$client_major" = "$SERVER_MAJOR" ] || return 1
+minor_difference=$((client_minor - SERVER_MINOR))
 [ "$minor_difference" -ge -1 ] && [ "$minor_difference" -le 1 ]
 }
 
 KUBECTL_BIN="$TOOLS_BIN/kubectl"
 if ! compatible_kubectl "$KUBECTL_BIN"; then
 EXISTING_KUBECTL=$(type -P kubectl || true)
+EXISTING_KUBECTL=$(command -v kubectl || true)
 if [ -n "$EXISTING_KUBECTL" ] && compatible_kubectl "$EXISTING_KUBECTL"; then
 echo "Using installed kubectl."
 # env.sh puts this directory on PATH for the administrator tool.
