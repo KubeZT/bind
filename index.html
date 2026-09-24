@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 main() (
+# Download cluster artifacts. Run with bash; do not use sudo.
+# Usage: curl -fsSL https://bind.kubezt.com | bash -s -- CLUSTER
 # Set up access to a KubeZT cluster. Run with bash; do not use sudo.
 # Usage: source <(curl -fsSL https://bind.kubezt.com) CLUSTER
 set +x
@@ -8,6 +10,7 @@ set -euo pipefail
 umask 077
 
 if [ "$#" -ne 1 ]; then
+echo "Usage: bash bind.sh CLUSTER" >&2
 echo "Usage: source <(curl -fsSL https://bind.kubezt.com) CLUSTER" >&2
 exit 1
 fi
@@ -127,14 +130,12 @@ with_spinner "$label" curl --fail --silent --show-error --location \
 download_quiet() {
 curl --fail --silent --show-error --location \
 --proto '=https' --proto-redir '=https' "$1" --output "$2"
-[ -s "$2" ] || { echo "Downloaded file is empty: $1" >&2; exit 1; }
 [ -s "$2" ] || { fail "Downloaded file is empty: $1"; exit 1; }
 }
 
 verify_sha256() {
 local expected="$1" actual
 [[ "$expected" =~ ^[a-fA-F0-9]{64}$ ]] || {
-echo "Invalid SHA-256 checksum for $(basename "$2")." >&2
 fail "Invalid SHA-256 checksum for $(basename "$2")."
 exit 1
 }
@@ -144,7 +145,6 @@ else
 actual=$(shasum -a 256 "$2" | awk '{print $1}')
 fi
 [ "$actual" = "$expected" ] || {
-echo "SHA-256 verification failed for $(basename "$2")." >&2
 fail "SHA-256 verification failed for $(basename "$2")."
 exit 1
 }
@@ -152,7 +152,6 @@ exit 1
 
 check_destination() {
 if [ -L "$1" ] || { [ -e "$1" ] && [ ! -f "$1" ]; }; then
-echo "Destination is not a regular file: $1" >&2
 fail "Destination is not a regular file: $1"
 exit 1
 fi
@@ -262,23 +261,23 @@ ARTIFACTS=(
 
 for artifact in "${ARTIFACTS[@]}"; do
 echo "Downloading $artifact..."
-AWS_PAGER='' AWS_CLI_AUTO_PROMPT=off "$AWS_BIN" \
 fetch_artifact() {
 AWS_PAGER='' AWS_CLI_AUTO_PROMPT=off "$AWS_BIN" \
 --profile "$PROFILE" --region "$REGION" \
 s3 cp "s3://$BUCKET/$artifact" "$TEMP_DIR/$artifact" --only-show-errors
-}
-with_spinner "Downloading $artifact" fetch_artifact
 [ -s "$TEMP_DIR/$artifact" ] || { echo "Empty artifact: $artifact" >&2; exit 1; }
+s3 cp "s3://$BUCKET/$CURRENT_ARTIFACT" "$TEMP_DIR/$CURRENT_ARTIFACT" --only-show-errors
+}
+
+for artifact in "${ARTIFACTS[@]}"; do
+CURRENT_ARTIFACT=$artifact
+with_spinner "Downloading $artifact" fetch_artifact
 [ -s "$TEMP_DIR/$artifact" ] || { fail "Empty artifact: $artifact"; exit 1; }
 done
 
-echo "Downloading kubezt.sh..."
-download https://bind.kubezt.com/kubezt.sh "$TEMP_DIR/kubezt.sh"
 download https://bind.kubezt.com/kubezt.sh "$TEMP_DIR/kubezt.sh" "Downloading kubezt.sh"
 case "$(head -n 1 "$TEMP_DIR/kubezt.sh")" in
 '#!/bin/bash'|'#!/usr/bin/env bash') ;;
-*) echo "The downloaded kubezt.sh is not a Bash script." >&2; exit 1 ;;
 *) fail "The downloaded kubezt.sh is not a Bash script."; exit 1 ;;
 esac
 bash -n "$TEMP_DIR/kubezt.sh"
@@ -287,29 +286,23 @@ chmod 0700 "$TEMP_DIR/kubezt.sh"
 case "$(uname -s)" in
 Darwin) PLATFORM=darwin; JQ_PLATFORM=macos ;;
 Linux) PLATFORM=linux; JQ_PLATFORM=linux ;;
-*) echo "Supported platforms: macOS and Linux." >&2; exit 1 ;;
 *) fail "Supported platforms: macOS and Linux."; exit 1 ;;
 esac
 case "$(uname -m)" in
 arm64|aarch64) ARCH=arm64 ;;
 x86_64|amd64) ARCH=amd64 ;;
-*) echo "Supported architectures: amd64 and arm64." >&2; exit 1 ;;
 *) fail "Supported architectures: amd64 and arm64."; exit 1 ;;
 esac
 
 mkdir -p "$TOOLS_BIN"
 chmod 0700 "$KUBEZT_DIR/tools" "$TOOLS_BIN"
-JQ_BIN=$(type -P jq || true)
 JQ_BIN=$(command -v jq || true)
 if [ -z "$JQ_BIN" ]; then
 JQ_BIN="$TOOLS_BIN/jq"
 if [ ! -x "$JQ_BIN" ]; then
-echo "Installing jq to read the cluster topology..."
 say "Installing jq to read the cluster topology"
 JQ_ASSET="jq-$JQ_PLATFORM-$ARCH"
 JQ_RELEASE=https://github.com/jqlang/jq/releases/download/jq-1.8.2
-download "$JQ_RELEASE/$JQ_ASSET" "$TEMP_DIR/jq"
-download "$JQ_RELEASE/sha256sum.txt" "$TEMP_DIR/jq.sha256"
 download "$JQ_RELEASE/$JQ_ASSET" "$TEMP_DIR/jq" "Downloading jq"
 download "$JQ_RELEASE/sha256sum.txt" "$TEMP_DIR/jq.sha256" "Downloading jq checksums"
 JQ_SHA256=$(awk -v asset="$JQ_ASSET" '$2 == asset || $2 == ("*" asset) {print $1}' "$TEMP_DIR/jq.sha256")
@@ -332,12 +325,6 @@ if type != "array" then error("Topology must be an array of clusters") else . en
 ' "$TEMP_DIR/$CLUSTER_NAME-topology.json")
 KUBERNETES_VERSION=${KUBERNETES_VERSION#v}
 KUBERNETES_VERSION=${KUBERNETES_VERSION%%+*}
-[[ "$KUBERNETES_VERSION" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || {
-echo "Invalid Kubernetes version in the topology." >&2
-exit 1
-}
-SERVER_MAJOR=${BASH_REMATCH[1]}
-SERVER_MINOR=${BASH_REMATCH[2]}
 case "$KUBERNETES_VERSION" in
 [0-9]*.[0-9]*.[0-9]*) ;;
 *)
@@ -356,14 +343,10 @@ exit 1
 esac
 
 compatible_kubectl() {
-local version minor_difference
 local version client_major client_rest client_minor minor_difference
 [ -x "$1" ] || return 1
 version=$("$1" version --client --output=json 2>/dev/null |
 "$JQ_BIN" -er '.clientVersion.gitVersion') || return 1
-[[ "$version" =~ ^v([0-9]+)\.([0-9]+)\. ]] || return 1
-[ "${BASH_REMATCH[1]}" = "$SERVER_MAJOR" ] || return 1
-minor_difference=$((10#${BASH_REMATCH[2]} - 10#$SERVER_MINOR))
 version=${version#v}
 case "$version" in
 [0-9]*.[0-9]*.*) ;;
@@ -382,19 +365,14 @@ minor_difference=$((client_minor - SERVER_MINOR))
 
 KUBECTL_BIN="$TOOLS_BIN/kubectl"
 if ! compatible_kubectl "$KUBECTL_BIN"; then
-EXISTING_KUBECTL=$(type -P kubectl || true)
 EXISTING_KUBECTL=$(command -v kubectl || true)
 if [ -n "$EXISTING_KUBECTL" ] && compatible_kubectl "$EXISTING_KUBECTL"; then
-echo "Using installed kubectl."
 ok "Using installed kubectl"
 # env.sh puts this directory on PATH for the administrator tool.
 ln -s "$EXISTING_KUBECTL" "$TEMP_DIR/kubectl"
 else
-echo "Installing kubectl v$KUBERNETES_VERSION..."
 say "Installing kubectl v$KUBERNETES_VERSION"
 KUBECTL_URL="https://dl.k8s.io/release/v$KUBERNETES_VERSION/bin/$PLATFORM/$ARCH/kubectl"
-download "$KUBECTL_URL" "$TEMP_DIR/kubectl"
-download "$KUBECTL_URL.sha256" "$TEMP_DIR/kubectl.sha256"
 download "$KUBECTL_URL" "$TEMP_DIR/kubectl" "Downloading kubectl v$KUBERNETES_VERSION"
 download "$KUBECTL_URL.sha256" "$TEMP_DIR/kubectl.sha256" "Downloading kubectl checksum"
 verify_sha256 "$(awk '{print $1}' "$TEMP_DIR/kubectl.sha256")" "$TEMP_DIR/kubectl"
@@ -403,7 +381,6 @@ ok "kubectl installed"
 fi
 # This path may already be a symlink created by an earlier bind run.
 if [ -d "$KUBECTL_BIN" ]; then
-echo "kubectl destination is a directory: $KUBECTL_BIN" >&2
 fail "kubectl destination is a directory: $KUBECTL_BIN"
 exit 1
 fi
@@ -423,6 +400,11 @@ chmod 0644 "$TEMP_DIR/$CLUSTER_NAME.pub"
 
 # Save the files only after all four downloads succeed.
 for artifact in "${ARTIFACTS[@]}"; do
+if [ -L "$CLUSTER_DIR/$artifact" ] ||
+{ [ -e "$CLUSTER_DIR/$artifact" ] && [ ! -f "$CLUSTER_DIR/$artifact" ]; }; then
+echo "Destination is not a regular file: $CLUSTER_DIR/$artifact" >&2
+exit 1
+fi
 check_destination "$CLUSTER_DIR/$artifact"
 done
 check_destination "$KUBEZT_DIR/kubezt.sh"
@@ -432,12 +414,15 @@ done
 mv -f "$TEMP_DIR/kubezt.sh" "$KUBEZT_DIR/kubezt.sh"
 
 echo "Artifacts saved to $CLUSTER_DIR"
-echo "KubeZT administrator tool installed at $KUBEZT_DIR/kubezt.sh"
 ok "Artifacts saved to $CLUSTER_DIR"
 ok "KubeZT administrator tool installed at $KUBEZT_DIR/kubezt.sh"
 )
 
-main "$@" || return $?
+main "$@"
+KUBEZT_BIND_STATUS=$?
+if [ "$KUBEZT_BIND_STATUS" -ne 0 ]; then
+return "$KUBEZT_BIND_STATUS" 2>/dev/null || exit "$KUBEZT_BIND_STATUS"
+fi
 
 export KUBEZT_HOME=${KUBEZT_HOME:-$HOME/.kubezt}
 KUBEZT_HOME=$(cd "$KUBEZT_HOME" && pwd -P)
@@ -461,7 +446,5 @@ else
 export PS1="KubeZT ($CLUSTER_NAME) [\W]$ "
 fi
 
-echo "KubeZT ($CLUSTER_NAME) is active."
-echo "Run: kubezt status"
 printf '\n%sKubeZT (%s) is active.%s\n' "$BOLD" "$CLUSTER_NAME" "$RESET"
 printf 'Run: %skubezt status%s\n\n' "$BOLD" "$RESET"
