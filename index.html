@@ -81,14 +81,14 @@ printf '%s[error]%s %s\n' "$RED" "$RESET" "$1" >&2
 }
 
 with_spinner() {
-local label="$1" pid status frame
+local label="$1" pid rc frame
 shift
 if [ ! -t 1 ]; then
 printf '==> %s...\n' "$label"
 "$@"
-status=$?
-[ "$status" -eq 0 ] && printf '[ok] %s\n' "$label"
-return "$status"
+rc=$?
+[ "$rc" -eq 0 ] && printf '[ok] %s\n' "$label"
+return "$rc"
 fi
 
 "$@" &
@@ -105,13 +105,13 @@ esac
 sleep 0.1
 done
 wait "$pid"
-status=$?
-if [ "$status" -eq 0 ]; then
+rc=$?
+if [ "$rc" -eq 0 ]; then
 printf '\r%s[ok]%s %s\n' "$GREEN" "$RESET" "$label"
 else
 printf '\r%s[error]%s %s\n' "$RED" "$RESET" "$label"
 fi
-return "$status"
+return "$rc"
 }
 
 banner
