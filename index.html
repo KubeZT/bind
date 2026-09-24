@@ -1,428 +1,442 @@
-#!/usr/bin/env bash
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KubeZT Bind | Developer Cluster Onboarding</title>
+  <style>
+    @page {
+      size: letter landscape;
+      margin: 0;
+    }
 
-main() (
-# Set up access to a KubeZT cluster. Run with bash; do not use sudo.
-# Usage: source <(curl -fsSL https://bind.kubezt.com/bind.sh) CLUSTER
-set +x
-set -euo pipefail
-umask 077
+    * {
+      box-sizing: border-box;
+    }
 
-if [ "$#" -ne 1 ]; then
-echo "Usage: source <(curl -fsSL https://bind.kubezt.com/bind.sh) CLUSTER" >&2
-exit 1
-fi
+    body {
+      margin: 0;
+      background: #eef5ff;
+      color: #07145d;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
 
-CLUSTER_NAME=$1
-[[ "$CLUSTER_NAME" =~ ^[a-z0-9][a-z0-9-]*$ ]] &&
-[ "${#CLUSTER_NAME}" -le 48 ] || {
-echo "Invalid cluster name." >&2
-exit 1
-}
+    .page {
+      position: relative;
+      width: 11in;
+      height: 8.5in;
+      overflow: hidden;
+      padding: 0.42in 0.5in;
+      background:
+        radial-gradient(circle at 52% 37%, rgba(32, 93, 255, 0.15), transparent 24%),
+        radial-gradient(circle at 12% 88%, rgba(16, 202, 255, 0.18), transparent 26%),
+        linear-gradient(135deg, #ffffff 0%, #f5f9ff 54%, #eef6ff 100%);
+    }
 
-PROFILE=$CLUSTER_NAME
-REGION=${AWS_REGION:-${AWS_DEFAULT_REGION:-us-gov-west-1}}
-KUBEZT_DIR=${KUBEZT_HOME:-$HOME/.kubezt}
-CLUSTER_DIR="$KUBEZT_DIR/clusters/$CLUSTER_NAME"
-BUCKET="kubezt-$CLUSTER_NAME-secrets"
-export AWS_SHARED_CREDENTIALS_FILE=${AWS_SHARED_CREDENTIALS_FILE:-$HOME/.aws/credentials}
-CREDENTIALS_FILE=$AWS_SHARED_CREDENTIALS_FILE
-AWS_DIR=$(dirname "$CREDENTIALS_FILE")
+    .page::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(20, 89, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 89, 255, 0.08) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at 50% 48%, black 0%, transparent 65%);
+      opacity: 0.55;
+    }
 
-mkdir -p "$CLUSTER_DIR" "$AWS_DIR"
-chmod 0700 "$KUBEZT_DIR" "$KUBEZT_DIR/clusters" "$CLUSTER_DIR" "$AWS_DIR"
-KUBEZT_DIR=$(cd "$KUBEZT_DIR" && pwd -P)
-CLUSTER_DIR="$KUBEZT_DIR/clusters/$CLUSTER_NAME"
-TOOLS_BIN="$KUBEZT_DIR/tools/bin"
+    .page::after {
+      content: "";
+      position: absolute;
+      left: -0.55in;
+      bottom: -0.8in;
+      width: 5.1in;
+      height: 3.5in;
+      border-radius: 50%;
+      border: 1px solid rgba(44, 113, 255, 0.18);
+      box-shadow:
+        0 0 0 18px rgba(61, 125, 255, 0.04),
+        0 0 0 42px rgba(61, 125, 255, 0.035),
+        0 0 80px rgba(18, 86, 255, 0.18);
+    }
 
-TEMP_DIR=$(mktemp -d "$CLUSTER_DIR/.download.XXXXXXXX")
-CREDENTIALS_LOCK=''
-cleanup() {
-rm -rf "$TEMP_DIR"
-if [ -n "$CREDENTIALS_LOCK" ]; then
-rmdir "$CREDENTIALS_LOCK" 2>/dev/null || true
-fi
-}
-trap cleanup EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM
+    .content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 0.24in;
+    }
 
-if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
-BOLD=$(tput bold 2>/dev/null || true)
-DIM=$(tput dim 2>/dev/null || true)
-GREEN=$(tput setaf 2 2>/dev/null || true)
-BLUE=$(tput setaf 4 2>/dev/null || true)
-RED=$(tput setaf 1 2>/dev/null || true)
-RESET=$(tput sgr0 2>/dev/null || true)
-else
-BOLD=''
-DIM=''
-GREEN=''
-BLUE=''
-RED=''
-RESET=''
-fi
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.3in;
+    }
 
-banner() {
-printf '\n'
-printf '%sKubeZT Bind Tool%s\n' "$BOLD" "$RESET"
-printf '%sBinding to cluster %s%s%s\n\n' "$DIM" "$BOLD" "$CLUSTER_NAME" "$RESET"
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.14in;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      color: #07145d;
+      font-size: 0.25in;
+    }
 
-say() {
-printf '%s==>%s %s\n' "$BLUE" "$RESET" "$1"
-}
+    .mark {
+      width: 0.42in;
+      height: 0.42in;
+      border-radius: 0.12in;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      background: linear-gradient(135deg, #07145d, #1459ff 56%, #00c7ff);
+      box-shadow: 0 16px 30px rgba(20, 89, 255, 0.25);
+      font-weight: 900;
+      font-size: 0.19in;
+    }
 
-ok() {
-printf '%s[ok]%s %s\n' "$GREEN" "$RESET" "$1"
-}
+    .eyebrow {
+      color: #185aff;
+      font-size: 0.105in;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
 
-fail() {
-printf '%s[error]%s %s\n' "$RED" "$RESET" "$1" >&2
-}
+    h1 {
+      margin: 0.05in 0 0;
+      max-width: 7.25in;
+      color: #05105a;
+      font-size: 0.47in;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+    }
 
-with_spinner() {
-local label="$1" pid rc frame
-shift
-if [ ! -t 1 ]; then
-printf '==> %s...\n' "$label"
-"$@"
-rc=$?
-[ "$rc" -eq 0 ] && printf '[ok] %s\n' "$label"
-return "$rc"
-fi
+    .subhead {
+      margin: 0.12in 0 0;
+      max-width: 7.2in;
+      color: #1a2a81;
+      font-size: 0.16in;
+      line-height: 1.38;
+      font-weight: 520;
+    }
 
-"$@" &
-pid=$!
-frame='-'
-while kill -0 "$pid" 2>/dev/null; do
-printf '\r%s %s...' "$frame" "$label"
-case "$frame" in
-'-') frame="\\" ;;
-"\\") frame='|' ;;
-'|') frame='/' ;;
-'/') frame='-' ;;
-esac
-sleep 0.1
-done
-wait "$pid"
-rc=$?
-if [ "$rc" -eq 0 ]; then
-printf '\r%s[ok]%s %s\n' "$GREEN" "$RESET" "$label"
-else
-printf '\r%s[error]%s %s\n' "$RED" "$RESET" "$label"
-fi
-return "$rc"
-}
+    .main {
+      display: grid;
+      grid-template-columns: 3.2in 1fr;
+      gap: 0.28in;
+      align-items: stretch;
+    }
 
-banner
+    .hero-card,
+    .panel,
+    .command {
+      border: 1px solid rgba(62, 107, 255, 0.18);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 20px 45px rgba(19, 47, 132, 0.10);
+      backdrop-filter: blur(10px);
+    }
 
-download() {
-local label
-label=${3:-"Downloading $(basename "$1")"}
-with_spinner "$label" curl --fail --silent --show-error --location \
---proto '=https' --proto-redir '=https' "$1" --output "$2"
-[ -s "$2" ] || { fail "Downloaded file is empty: $1"; exit 1; }
-}
+    .hero-card {
+      position: relative;
+      min-height: 5.04in;
+      padding: 0.28in;
+      border-radius: 0.18in;
+      overflow: hidden;
+    }
 
-download_quiet() {
-curl --fail --silent --show-error --location \
---proto '=https' --proto-redir '=https' "$1" --output "$2"
-[ -s "$2" ] || { fail "Downloaded file is empty: $1"; exit 1; }
-}
+    .orb {
+      position: absolute;
+      left: 0.36in;
+      top: 0.36in;
+      width: 2.4in;
+      height: 2.4in;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.94), rgba(222,237,255,0.64) 58%, rgba(20,89,255,0.12) 100%);
+      border: 1px solid rgba(20, 89, 255, 0.2);
+      box-shadow: inset 0 0 55px rgba(20, 89, 255, 0.14), 0 22px 60px rgba(20, 89, 255, 0.16);
+    }
 
-verify_sha256() {
-local expected="$1" actual
-[[ "$expected" =~ ^[a-fA-F0-9]{64}$ ]] || {
-fail "Invalid SHA-256 checksum for $(basename "$2")."
-exit 1
-}
-if command -v sha256sum >/dev/null 2>&1; then
-actual=$(sha256sum "$2" | awk '{print $1}')
-else
-actual=$(shasum -a 256 "$2" | awk '{print $1}')
-fi
-[ "$actual" = "$expected" ] || {
-fail "SHA-256 verification failed for $(basename "$2")."
-exit 1
-}
-}
+    .orb::before,
+    .orb::after {
+      content: "";
+      position: absolute;
+      inset: 0.25in;
+      border-radius: 50%;
+      border: 1px dashed rgba(20, 89, 255, 0.38);
+      transform: rotate(-20deg) scaleX(1.24);
+    }
 
-check_destination() {
-if [ -L "$1" ] || { [ -e "$1" ] && [ ! -f "$1" ]; }; then
-fail "Destination is not a regular file: $1"
-exit 1
-fi
-}
+    .orb::after {
+      transform: rotate(56deg) scaleX(1.24);
+    }
 
-check_credentials_file() {
-if [ -L "$CREDENTIALS_FILE" ] ||
-{ [ -e "$CREDENTIALS_FILE" ] &&
-{ [ ! -f "$CREDENTIALS_FILE" ] || [ ! -r "$CREDENTIALS_FILE" ]; }; }; then
-fail "AWS credentials must be a readable regular file: $CREDENTIALS_FILE"
-exit 1
-fi
-}
+    .stack {
+      position: absolute;
+      left: 0.66in;
+      top: 1.42in;
+      width: 1.8in;
+      height: 1.18in;
+      transform: perspective(450px) rotateX(56deg) rotateZ(-37deg);
+    }
 
-profile_exists() {
-[ -f "$CREDENTIALS_FILE" ] || return 1
-awk -v profile="$PROFILE" '
-/^[[:space:]]*\[/ {
-section = $0
-sub(/^[[:space:]]*\[/, "", section)
-sub(/\].*$/, "", section)
-if (section == profile) found = 1
-}
-END { exit !found }
-' "$CREDENTIALS_FILE"
-}
+    .layer {
+      position: absolute;
+      width: 1.8in;
+      height: 0.52in;
+      border-radius: 0.08in;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(30,94,255,0.92));
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 8px 16px rgba(18, 52, 140, 0.24);
+    }
 
-check_credentials_file
-if profile_exists; then
-ok "Using existing AWS profile [$PROFILE]"
-else
-# stdin contains the script when invoked through curl | bash.
-if ! { exec 3<>/dev/tty; } 2>/dev/null; then
-fail "AWS profile [$PROFILE] is missing. Run bind from an interactive terminal to enter credentials."
-exit 1
-fi
+    .layer:nth-child(1) { top: 0; }
+    .layer:nth-child(2) { top: 0.26in; background: linear-gradient(135deg, rgba(232,242,255,0.95), rgba(14,52,170,0.92)); }
+    .layer:nth-child(3) { top: 0.52in; background: linear-gradient(135deg, rgba(209,239,255,0.95), rgba(6,23,90,0.94)); }
 
-say "AWS credentials"
-printf 'Profile: [%s]\nAccess Key ID: ' "$PROFILE" >&3
-IFS= read -r ACCESS_KEY_ID <&3 || exit 1
-printf 'Access Key Secret: ' >&3
-IFS= read -r -s ACCESS_KEY_SECRET <&3 || { printf '\n' >&3; exit 1; }
-printf '\n' >&3
-exec 3>&-
+    .hero-copy {
+      position: absolute;
+      left: 0.28in;
+      right: 0.28in;
+      bottom: 0.28in;
+    }
 
-if ! [[ "$ACCESS_KEY_ID" =~ ^[A-Za-z0-9]+$ ]] ||
-! [[ "$ACCESS_KEY_SECRET" =~ ^[A-Za-z0-9/+=]+$ ]]; then
-fail "Credentials must be nonempty and contain only valid key characters."
-exit 1
-fi
+    .hero-copy h2 {
+      margin: 0 0 0.07in;
+      font-size: 0.21in;
+      color: #07145d;
+      line-height: 1.1;
+    }
 
-# Serialize writes by bind, then recheck in case another run added the profile.
-if ! mkdir "$CREDENTIALS_FILE.kubezt-lock" 2>/dev/null; then
-fail "AWS credentials are locked by another bind run. Retry after it finishes: $CREDENTIALS_FILE.kubezt-lock"
-exit 1
-fi
-CREDENTIALS_LOCK="$CREDENTIALS_FILE.kubezt-lock"
-check_credentials_file
-if profile_exists; then
-ok "Using existing AWS profile [$PROFILE]; entered credentials were not saved"
-else
-: >> "$CREDENTIALS_FILE"
-chmod 0600 "$CREDENTIALS_FILE"
-# Bash printf keeps credentials out of external process arguments.
-printf '\n[%s]\naws_access_key_id = %s\naws_secret_access_key = %s\n' \
-"$PROFILE" "$ACCESS_KEY_ID" "$ACCESS_KEY_SECRET" >> "$CREDENTIALS_FILE"
-ok "Created AWS profile [$PROFILE]"
-fi
-unset ACCESS_KEY_ID ACCESS_KEY_SECRET
-rmdir "$CREDENTIALS_LOCK"
-CREDENTIALS_LOCK=''
-fi
+    .hero-copy p {
+      margin: 0;
+      color: #243488;
+      font-size: 0.12in;
+      line-height: 1.43;
+    }
 
-AWS_BIN=$(command -v aws || true)
-if [ -z "$AWS_BIN" ]; then
-AWS_BIN="$KUBEZT_DIR/tools/bin/aws"
-if [ ! -x "$AWS_BIN" ]; then
-echo "Installing AWS CLI..."
-curl --fail --silent --show-error --location \
---proto '=https' --proto-redir '=https' \
-https://awscli.amazonaws.com/v2/install.sh \
---output "$TEMP_DIR/aws-install.sh"
-XDG_DATA_HOME="$KUBEZT_DIR/tools" XDG_BIN_HOME="$KUBEZT_DIR/tools/bin" \
-bash "$TEMP_DIR/aws-install.sh" </dev/null
-[ -x "$AWS_BIN" ] || { fail "AWS CLI installation failed."; exit 1; }
-ok "AWS CLI installed"
-fi
-else
-ok "Using installed AWS CLI"
-fi
+    .right {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 0.18in;
+    }
 
-ARTIFACTS=(
-"$CLUSTER_NAME-topology.json"
-"$CLUSTER_NAME"
-"$CLUSTER_NAME.pub"
-"$CLUSTER_NAME.config"
-)
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.15in;
+    }
 
-fetch_artifact() {
-AWS_PAGER='' AWS_CLI_AUTO_PROMPT=off "$AWS_BIN" \
---profile "$PROFILE" --region "$REGION" \
-s3 cp "s3://$BUCKET/$CURRENT_ARTIFACT" "$TEMP_DIR/$CURRENT_ARTIFACT" --only-show-errors
-}
+    .panel {
+      border-radius: 0.16in;
+      padding: 0.18in;
+    }
 
-for artifact in "${ARTIFACTS[@]}"; do
-CURRENT_ARTIFACT=$artifact
-with_spinner "Downloading $artifact" fetch_artifact
-[ -s "$TEMP_DIR/$artifact" ] || { fail "Empty artifact: $artifact"; exit 1; }
-done
+    .step-num {
+      color: #185aff;
+      font-size: 0.27in;
+      line-height: 1;
+      font-weight: 900;
+    }
 
-download https://bind.kubezt.com/kubezt.sh "$TEMP_DIR/kubezt.sh" "Downloading kubezt.sh"
-case "$(head -n 1 "$TEMP_DIR/kubezt.sh")" in
-'#!/bin/bash'|'#!/usr/bin/env bash') ;;
-*) fail "The downloaded kubezt.sh is not a Bash script."; exit 1 ;;
-esac
-bash -n "$TEMP_DIR/kubezt.sh"
-chmod 0700 "$TEMP_DIR/kubezt.sh"
+    .panel h3 {
+      margin: 0.08in 0 0.055in;
+      color: #07145d;
+      font-size: 0.145in;
+      line-height: 1.12;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
 
-case "$(uname -s)" in
-Darwin) PLATFORM=darwin; JQ_PLATFORM=macos ;;
-Linux) PLATFORM=linux; JQ_PLATFORM=linux ;;
-*) fail "Supported platforms: macOS and Linux."; exit 1 ;;
-esac
-case "$(uname -m)" in
-arm64|aarch64) ARCH=arm64 ;;
-x86_64|amd64) ARCH=amd64 ;;
-*) fail "Supported architectures: amd64 and arm64."; exit 1 ;;
-esac
+    .panel p {
+      margin: 0;
+      color: #243488;
+      font-size: 0.108in;
+      line-height: 1.38;
+    }
 
-mkdir -p "$TOOLS_BIN"
-chmod 0700 "$KUBEZT_DIR/tools" "$TOOLS_BIN"
-JQ_BIN=$(command -v jq || true)
-if [ -z "$JQ_BIN" ]; then
-JQ_BIN="$TOOLS_BIN/jq"
-if [ ! -x "$JQ_BIN" ]; then
-say "Installing jq to read the cluster topology"
-JQ_ASSET="jq-$JQ_PLATFORM-$ARCH"
-JQ_RELEASE=https://github.com/jqlang/jq/releases/download/jq-1.8.2
-download "$JQ_RELEASE/$JQ_ASSET" "$TEMP_DIR/jq" "Downloading jq"
-download "$JQ_RELEASE/sha256sum.txt" "$TEMP_DIR/jq.sha256" "Downloading jq checksums"
-JQ_SHA256=$(awk -v asset="$JQ_ASSET" '$2 == asset || $2 == ("*" asset) {print $1}' "$TEMP_DIR/jq.sha256")
-verify_sha256 "$JQ_SHA256" "$TEMP_DIR/jq"
-chmod 0700 "$TEMP_DIR/jq"
-check_destination "$JQ_BIN"
-mv -f "$TEMP_DIR/jq" "$JQ_BIN"
-ok "jq installed"
-fi
-else
-ok "Using installed jq"
-fi
+    .command {
+      border-radius: 0.16in;
+      padding: 0.18in 0.2in;
+      background: linear-gradient(135deg, rgba(5, 16, 90, 0.98), rgba(13, 66, 196, 0.95));
+      color: #ffffff;
+    }
 
-KUBERNETES_VERSION=$("$JQ_BIN" -er --arg name "$CLUSTER_NAME" '
-if type != "array" then error("Topology must be an array of clusters") else . end
-| [.[] | select(.name == $name)]
-| if length != 1 then error("Topology must contain exactly one matching cluster") else .[0] end
-| .version.rke2.version
-| if type != "string" then error("Missing cluster Kubernetes version") else . end
-' "$TEMP_DIR/$CLUSTER_NAME-topology.json")
-KUBERNETES_VERSION=${KUBERNETES_VERSION#v}
-KUBERNETES_VERSION=${KUBERNETES_VERSION%%+*}
-case "$KUBERNETES_VERSION" in
-[0-9]*.[0-9]*.[0-9]*) ;;
-*)
-fail "Invalid Kubernetes version in the topology."
-exit 1
-;;
-esac
-SERVER_MAJOR=${KUBERNETES_VERSION%%.*}
-SERVER_REST=${KUBERNETES_VERSION#*.}
-SERVER_MINOR=${SERVER_REST%%.*}
-case "$SERVER_MAJOR:$SERVER_MINOR" in
-*[!0-9:]*|:|*:)
-fail "Invalid Kubernetes version in the topology."
-exit 1
-;;
-esac
+    .command .label {
+      margin: 0 0 0.07in;
+      color: #9ddfff;
+      font-size: 0.105in;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
 
-compatible_kubectl() {
-local version client_major client_rest client_minor minor_difference
-[ -x "$1" ] || return 1
-version=$("$1" version --client --output=json 2>/dev/null |
-"$JQ_BIN" -er '.clientVersion.gitVersion') || return 1
-version=${version#v}
-case "$version" in
-[0-9]*.[0-9]*.*) ;;
-*) return 1 ;;
-esac
-client_major=${version%%.*}
-client_rest=${version#*.}
-client_minor=${client_rest%%.*}
-case "$client_major:$client_minor" in
-*[!0-9:]*|:|*:) return 1 ;;
-esac
-[ "$client_major" = "$SERVER_MAJOR" ] || return 1
-minor_difference=$((client_minor - SERVER_MINOR))
-[ "$minor_difference" -ge -1 ] && [ "$minor_difference" -le 1 ]
-}
+    code {
+      display: block;
+      padding: 0.14in 0.16in;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 0.1in;
+      background: rgba(0, 0, 0, 0.18);
+      color: #ffffff;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.118in;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
 
-KUBECTL_BIN="$TOOLS_BIN/kubectl"
-if ! compatible_kubectl "$KUBECTL_BIN"; then
-EXISTING_KUBECTL=$(command -v kubectl || true)
-if [ -n "$EXISTING_KUBECTL" ] && compatible_kubectl "$EXISTING_KUBECTL"; then
-ok "Using installed kubectl"
-# env.sh puts this directory on PATH for the administrator tool.
-ln -s "$EXISTING_KUBECTL" "$TEMP_DIR/kubectl"
-else
-say "Installing kubectl v$KUBERNETES_VERSION"
-KUBECTL_URL="https://dl.k8s.io/release/v$KUBERNETES_VERSION/bin/$PLATFORM/$ARCH/kubectl"
-download "$KUBECTL_URL" "$TEMP_DIR/kubectl" "Downloading kubectl v$KUBERNETES_VERSION"
-download "$KUBECTL_URL.sha256" "$TEMP_DIR/kubectl.sha256" "Downloading kubectl checksum"
-verify_sha256 "$(awk '{print $1}' "$TEMP_DIR/kubectl.sha256")" "$TEMP_DIR/kubectl"
-chmod 0700 "$TEMP_DIR/kubectl"
-ok "kubectl installed"
-fi
-# This path may already be a symlink created by an earlier bind run.
-if [ -d "$KUBECTL_BIN" ]; then
-fail "kubectl destination is a directory: $KUBECTL_BIN"
-exit 1
-fi
-mv -f "$TEMP_DIR/kubectl" "$KUBECTL_BIN"
-else
-ok "Using cached kubectl"
-fi
+    .lower {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.15in;
+    }
 
-say "Validating kubeconfig"
-"$KUBECTL_BIN" --kubeconfig "$TEMP_DIR/$CLUSTER_NAME.config" \
-config view --minify -o 'jsonpath={.current-context}' >/dev/null
-ok "Kubeconfig validated"
+    .list {
+      margin: 0.1in 0 0;
+      padding: 0;
+      list-style: none;
+    }
 
-chmod 0600 "$TEMP_DIR/$CLUSTER_NAME-topology.json" \
-"$TEMP_DIR/$CLUSTER_NAME" "$TEMP_DIR/$CLUSTER_NAME.config"
-chmod 0644 "$TEMP_DIR/$CLUSTER_NAME.pub"
+    .list li {
+      position: relative;
+      margin: 0 0 0.065in;
+      padding-left: 0.2in;
+      color: #243488;
+      font-size: 0.109in;
+      line-height: 1.3;
+    }
 
-# Save the files only after all four downloads succeed.
-for artifact in "${ARTIFACTS[@]}"; do
-check_destination "$CLUSTER_DIR/$artifact"
-done
-check_destination "$KUBEZT_DIR/kubezt.sh"
-for artifact in "${ARTIFACTS[@]}"; do
-mv -f "$TEMP_DIR/$artifact" "$CLUSTER_DIR/$artifact"
-done
-mv -f "$TEMP_DIR/kubezt.sh" "$KUBEZT_DIR/kubezt.sh"
+    .list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.04in;
+      width: 0.085in;
+      height: 0.085in;
+      border-radius: 50%;
+      background: #185aff;
+      box-shadow: 0 0 0 4px rgba(24, 90, 255, 0.12);
+    }
 
-ok "Artifacts saved to $CLUSTER_DIR"
-ok "KubeZT administrator tool installed at $KUBEZT_DIR/kubezt.sh"
-)
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.3in;
+      color: #31419a;
+      font-size: 0.105in;
+    }
 
-main "$@"
-KUBEZT_BIND_STATUS=$?
-if [ "$KUBEZT_BIND_STATUS" -ne 0 ]; then
-return "$KUBEZT_BIND_STATUS" 2>/dev/null || exit "$KUBEZT_BIND_STATUS"
-fi
+    .tagline {
+      color: #07145d;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
 
-export KUBEZT_HOME=${KUBEZT_HOME:-$HOME/.kubezt}
-KUBEZT_HOME=$(cd "$KUBEZT_HOME" && pwd -P)
-export CLUSTER_NAME=$1
-export KUBECONFIG="$KUBEZT_HOME/clusters/$CLUSTER_NAME/$CLUSTER_NAME.config"
-export KUBEZT_ADMIN_SCRIPT="$KUBEZT_HOME/kubezt.sh"
+    .rule {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(24,90,255,0.5), rgba(0,199,255,0.08));
+    }
 
-case ":${PATH-}:" in
-*":$KUBEZT_HOME/tools/bin:"*) ;;
-*) export PATH="$KUBEZT_HOME/tools/bin:${PATH-}" ;;
-esac
+    @media print {
+      body {
+        background: #ffffff;
+      }
 
-unalias kubezt 2>/dev/null || true
-kubezt() {
-"$KUBEZT_ADMIN_SCRIPT" "$@"
-}
+      .page {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="content">
+      <header>
+        <div class="topline">
+          <div class="brand"><div class="mark">ZT</div><div>KubeZT</div></div>
+          <div class="eyebrow">Developer Cluster Onboarding</div>
+        </div>
+        <h1>Bind your workstation to a KubeZT cluster.</h1>
+        <p class="subhead">Binding prepares your local environment to reach a KubeZT enclave through verified identity, scoped artifact access, and a cluster-specific Kubernetes context.</p>
+      </header>
 
-if [ -n "${ZSH_VERSION-}" ]; then
-export PS1="KubeZT ($CLUSTER_NAME) [%1~]$ "
-else
-export PS1="KubeZT ($CLUSTER_NAME) [\W]$ "
-fi
+      <section class="main">
+        <aside class="hero-card">
+          <div class="orb"></div>
+          <div class="stack">
+            <div class="layer"></div>
+            <div class="layer"></div>
+            <div class="layer"></div>
+          </div>
+          <div class="hero-copy">
+            <h2>One command. One context. Ready to operate.</h2>
+            <p>The bind flow installs the local helpers it needs, downloads approved cluster artifacts, activates the kubeconfig, and exposes the KubeZT administrator command in the current terminal.</p>
+          </div>
+        </aside>
 
-printf '\n%sKubeZT (%s) is active.%s\n' "$BOLD" "$CLUSTER_NAME" "$RESET"
-printf 'Run: %skubezt status%s\n\n' "$BOLD" "$RESET"
+        <section class="right">
+          <div class="steps">
+            <div class="panel">
+              <div class="step-num">01</div>
+              <h3>Install OpenZiti</h3>
+              <p>Install the OpenZiti client for your platform so your workstation can reach private KubeZT services.</p>
+            </div>
+            <div class="panel">
+              <div class="step-num">02</div>
+              <h3>Enroll Identity</h3>
+              <p>Load the identity provided by your administrator and confirm the client is connected.</p>
+            </div>
+            <div class="panel">
+              <div class="step-num">03</div>
+              <h3>Run Bind</h3>
+              <p>Run the bind command, enter the access keys provided to you, and start using kubectl.</p>
+            </div>
+          </div>
+
+          <div class="command">
+            <div class="label">Activation Command</div>
+            <code>source &lt;(curl -fsSL https://bind.kubezt.com) &lt;cluster-name&gt;
+kubezt status
+kubectl get nodes</code>
+          </div>
+
+          <div class="lower">
+            <div class="panel">
+              <h3>What Bind Configures</h3>
+              <ul class="list">
+                <li>A cluster AWS profile in <strong>~/.aws/credentials</strong> when needed.</li>
+                <li>Cluster artifacts in <strong>~/.kubezt/clusters/&lt;cluster&gt;</strong>.</li>
+                <li>A local KUBECONFIG pointing at <strong>&lt;cluster&gt;.config</strong>.</li>
+                <li>The <strong>kubezt</strong> command and compatible kubectl tooling.</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3>Before You Start</h3>
+              <ul class="list">
+                <li>OpenZiti client is installed and running.</li>
+                <li>Your identity is enrolled and available on the workstation.</li>
+                <li>You have the cluster name and read-only artifact access keys.</li>
+                <li>Your terminal is Bash or Zsh on macOS or Linux.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <footer class="footer">
+        <div class="tagline">Independent. Secure. Interoperable.</div>
+        <div class="rule"></div>
+        <div>Bind establishes local access without exposing the cluster control plane to the open network.</div>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
+
