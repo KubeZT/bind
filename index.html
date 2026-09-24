@@ -13,7 +13,7 @@
             --muted: #4050a0;
             --line: rgba(70, 116, 255, 0.18);
             --card: rgba(255, 255, 255, 0.84);
-            --shadow: 0 26px 70px rgba(14, 38, 122, 0.12);
+            --shadow: 0 18px 48px rgba(14, 38, 122, 0.10);
         }
 
         * {
@@ -39,7 +39,7 @@
             min-height: 100vh;
             width: 100%;
             overflow: hidden;
-            padding: clamp(32px, 4vw, 66px);
+            padding: clamp(24px, 3vw, 44px);
             background:
                     radial-gradient(circle at 78% 10%, rgba(0, 199, 255, 0.18), transparent 30%),
                     radial-gradient(circle at 14% 84%, rgba(21, 88, 255, 0.15), transparent 28%),
@@ -75,27 +75,27 @@
         .content {
             position: relative;
             z-index: 1;
-            max-width: 1480px;
-            min-height: calc(100vh - clamp(64px, 8vw, 132px));
+            max-width: 1240px;
+            min-height: calc(100vh - clamp(48px, 6vw, 88px));
             margin: 0 auto;
             display: grid;
             grid-template-rows: auto 1fr auto;
-            gap: clamp(22px, 3vw, 42px);
+            gap: clamp(16px, 2vw, 28px);
         }
 
         header {
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
-            gap: 32px;
+            gap: 24px;
             align-items: start;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-            font-size: clamp(28px, 2.2vw, 38px);
+            gap: 12px;
+            margin-bottom: 18px;
+            font-size: clamp(24px, 1.8vw, 32px);
             font-weight: 900;
             letter-spacing: -0.02em;
         }
@@ -103,20 +103,20 @@
         .mark {
             display: grid;
             place-items: center;
-            width: 58px;
-            height: 58px;
-            border-radius: 15px;
+            width: 48px;
+            height: 48px;
+            border-radius: 13px;
             color: #ffffff;
             background: linear-gradient(135deg, var(--deep), var(--blue) 55%, var(--cyan));
             box-shadow: 0 18px 36px rgba(21, 88, 255, 0.26);
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 900;
         }
 
         .eyebrow {
             align-self: center;
             color: var(--blue);
-            font-size: clamp(13px, 1vw, 16px);
+            font-size: clamp(11px, 0.85vw, 14px);
             font-weight: 900;
             letter-spacing: 0.22em;
             text-transform: uppercase;
@@ -125,26 +125,26 @@
 
         h1 {
             margin: 0;
-            max-width: 930px;
-            font-size: clamp(54px, 5.4vw, 96px);
-            line-height: 0.95;
+            max-width: 760px;
+            font-size: clamp(42px, 4.1vw, 66px);
+            line-height: 0.98;
             letter-spacing: -0.045em;
             color: var(--deep);
         }
 
         .lede {
-            max-width: 840px;
-            margin: 24px 0 0;
+            max-width: 720px;
+            margin: 18px 0 0;
             color: var(--ink);
-            font-size: clamp(20px, 1.55vw, 27px);
+            font-size: clamp(17px, 1.25vw, 21px);
             line-height: 1.34;
             font-weight: 750;
         }
 
         .main {
             display: grid;
-            grid-template-columns: minmax(430px, 0.88fr) minmax(620px, 1.35fr);
-            gap: clamp(24px, 3vw, 44px);
+            grid-template-columns: minmax(340px, 0.82fr) minmax(560px, 1.35fr);
+            gap: clamp(18px, 2.2vw, 30px);
             align-items: stretch;
         }
 
@@ -159,87 +159,104 @@
 
         .visual {
             position: relative;
-            min-height: 520px;
-            border-radius: 24px;
-            padding: clamp(28px, 3vw, 44px);
+            min-height: 440px;
+            border-radius: 20px;
+            padding: clamp(22px, 2vw, 30px);
             overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 22px;
         }
 
-        .visual::before {
+        .mini-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .mini-title::after {
             content: "";
-            position: absolute;
-            inset: 12%;
-            border-radius: 50%;
-            border: 1px solid rgba(21, 88, 255, 0.13);
-            box-shadow:
-                    inset 0 0 70px rgba(21, 88, 255, 0.06),
-                    0 0 0 38px rgba(21, 88, 255, 0.025);
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(21, 88, 255, 0.4), transparent);
         }
 
-        .nodes {
-            position: absolute;
-            inset: 0;
+        .bind-flow {
+            align-self: center;
+            display: grid;
+            gap: 16px;
         }
 
-        .node {
-            position: absolute;
+        .flow-item {
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 16px;
+            align-items: center;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(21, 88, 255, 0.16);
+            box-shadow: 0 14px 32px rgba(14, 38, 122, 0.08);
+        }
+
+        .flow-icon {
             display: grid;
             place-items: center;
-            width: 82px;
-            height: 82px;
-            border-radius: 24px;
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
             color: var(--blue);
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(21, 88, 255, 0.2);
-            box-shadow: 0 18px 42px rgba(20, 52, 150, 0.16);
+            background: #ffffff;
+            border: 1px solid rgba(21, 88, 255, 0.16);
         }
 
-        .node svg {
-            width: 38px;
-            height: 38px;
+        .flow-icon.primary {
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--deep), var(--blue));
+        }
+
+        .flow-icon svg {
+            width: 28px;
+            height: 28px;
             stroke: currentColor;
-            stroke-width: 1.8;
+            stroke-width: 1.9;
             fill: none;
         }
 
-        .node.workstation { left: 15%; top: 21%; }
-        .node.identity { right: 14%; top: 18%; color: #04a9dd; }
-        .node.cluster { left: 50%; top: 48%; transform: translate(-50%, -50%); width: 112px; height: 112px; border-radius: 30px; color: #ffffff; background: linear-gradient(135deg, var(--deep), var(--blue)); }
-        .node.config { left: 18%; bottom: 18%; color: #1558ff; }
-        .node.kubectl { right: 16%; bottom: 17%; color: #05a9d8; }
-
-        .link {
-            position: absolute;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(21, 88, 255, 0.05), rgba(21, 88, 255, 0.48), rgba(0, 199, 255, 0.06));
-            transform-origin: left center;
+        .flow-copy strong {
+            display: block;
+            color: var(--deep);
+            font-size: 17px;
+            line-height: 1.1;
+            margin-bottom: 4px;
+            text-transform: uppercase;
         }
 
-        .link.one { left: 26%; top: 31%; width: 34%; transform: rotate(19deg); }
-        .link.two { left: 52%; top: 42%; width: 31%; transform: rotate(-23deg); }
-        .link.three { left: 28%; bottom: 29%; width: 29%; transform: rotate(-23deg); }
-        .link.four { left: 53%; bottom: 32%; width: 29%; transform: rotate(18deg); }
-
-        .visual-copy {
-            position: absolute;
-            left: clamp(28px, 3vw, 44px);
-            right: clamp(28px, 3vw, 44px);
-            bottom: clamp(28px, 3vw, 44px);
+        .flow-copy span {
+            display: block;
+            color: var(--ink);
+            font-size: 14px;
+            line-height: 1.35;
+            font-weight: 600;
         }
 
         .visual-copy h2 {
-            max-width: 420px;
             margin: 0 0 12px;
-            font-size: clamp(28px, 2.3vw, 39px);
+            font-size: clamp(24px, 1.8vw, 31px);
             line-height: 1.04;
             letter-spacing: -0.02em;
         }
 
         .visual-copy p {
-            max-width: 475px;
             margin: 0;
             color: var(--ink);
-            font-size: clamp(16px, 1.15vw, 19px);
+            font-size: clamp(14px, 0.98vw, 16px);
             line-height: 1.45;
             font-weight: 600;
         }
@@ -247,23 +264,23 @@
         .right {
             display: grid;
             grid-template-rows: auto auto 1fr;
-            gap: 22px;
+            gap: 18px;
         }
 
         .steps {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 22px;
+            gap: 18px;
         }
 
         .card {
-            border-radius: 22px;
-            padding: clamp(22px, 1.8vw, 30px);
+            border-radius: 18px;
+            padding: clamp(18px, 1.35vw, 24px);
         }
 
         .num {
             color: var(--blue);
-            font-size: clamp(38px, 3vw, 50px);
+            font-size: clamp(30px, 2.35vw, 40px);
             line-height: 1;
             font-weight: 900;
             letter-spacing: -0.04em;
@@ -272,7 +289,7 @@
         h3 {
             margin: 14px 0 8px;
             color: var(--deep);
-            font-size: clamp(18px, 1.35vw, 23px);
+            font-size: clamp(15px, 1.05vw, 19px);
             line-height: 1.08;
             letter-spacing: 0.01em;
             text-transform: uppercase;
@@ -281,14 +298,14 @@
         .card p {
             margin: 0;
             color: var(--ink);
-            font-size: clamp(15px, 1.05vw, 17px);
+            font-size: clamp(13px, 0.9vw, 15px);
             line-height: 1.42;
             font-weight: 560;
         }
 
         .command {
-            border-radius: 24px;
-            padding: clamp(24px, 2vw, 32px);
+            border-radius: 20px;
+            padding: clamp(19px, 1.45vw, 25px);
             color: #ffffff;
             background: linear-gradient(135deg, #07145d, #1237a3 55%, #1558ff);
         }
@@ -296,7 +313,7 @@
         .command-label {
             margin-bottom: 12px;
             color: #a9e9ff;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 900;
             letter-spacing: 0.16em;
             text-transform: uppercase;
@@ -304,13 +321,13 @@
 
         code {
             display: block;
-            padding: 20px 24px;
-            border-radius: 16px;
+            padding: 16px 20px;
+            border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.2);
             background: rgba(0, 0, 0, 0.2);
             color: #ffffff;
             font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-            font-size: clamp(15px, 1.15vw, 19px);
+            font-size: clamp(13px, 0.95vw, 16px);
             line-height: 1.55;
             white-space: pre-wrap;
         }
@@ -318,7 +335,7 @@
         .lower {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 22px;
+            gap: 18px;
         }
 
         ul {
@@ -332,7 +349,7 @@
             margin: 0 0 12px;
             padding-left: 28px;
             color: var(--ink);
-            font-size: clamp(15px, 1.02vw, 17px);
+            font-size: clamp(13px, 0.9vw, 15px);
             line-height: 1.34;
             font-weight: 560;
         }
@@ -450,30 +467,39 @@
 
         <section class="main">
             <aside class="visual">
-                <div class="nodes">
-                    <div class="link one"></div>
-                    <div class="link two"></div>
-                    <div class="link three"></div>
-                    <div class="link four"></div>
-                    <div class="node workstation">
-                        <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M8 20h8M10 16v4M14 16v4"></path></svg>
+                <div class="mini-title">Bind Flow</div>
+                <div class="bind-flow">
+                    <div class="flow-item">
+                        <div class="flow-icon">
+                            <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M8 20h8M10 16v4M14 16v4"></path></svg>
+                        </div>
+                        <div class="flow-copy">
+                            <strong>Workstation</strong>
+                            <span>Developer terminal with OpenZiti identity available.</span>
+                        </div>
                     </div>
-                    <div class="node identity">
-                        <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.2-2.8 7.5-7 9-4.2-1.5-7-4.8-7-9V7l7-4z"></path><path d="M9.5 12.5l1.8 1.8 3.7-4.1"></path></svg>
+                    <div class="flow-item">
+                        <div class="flow-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.2-2.8 7.5-7 9-4.2-1.5-7-4.8-7-9V7l7-4z"></path><path d="M9.5 12.5l1.8 1.8 3.7-4.1"></path></svg>
+                        </div>
+                        <div class="flow-copy">
+                            <strong>Verified Access</strong>
+                            <span>Scoped keys retrieve only the approved cluster artifacts.</span>
+                        </div>
                     </div>
-                    <div class="node cluster">
-                        <svg viewBox="0 0 24 24"><path d="M12 3l7.5 4.3v8.4L12 20l-7.5-4.3V7.3L12 3z"></path><path d="M12 8v8M8.5 10l7 4M15.5 10l-7 4"></path></svg>
-                    </div>
-                    <div class="node config">
-                        <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"></path><path d="M14 3v4h4M8 12h8M8 16h6"></path></svg>
-                    </div>
-                    <div class="node kubectl">
-                        <svg viewBox="0 0 24 24"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"></path></svg>
+                    <div class="flow-item">
+                        <div class="flow-icon primary">
+                            <svg viewBox="0 0 24 24"><path d="M12 3l7.5 4.3v8.4L12 20l-7.5-4.3V7.3L12 3z"></path><path d="M12 8v8M8.5 10l7 4M15.5 10l-7 4"></path></svg>
+                        </div>
+                        <div class="flow-copy">
+                            <strong>Active Cluster</strong>
+                            <span>Kubeconfig, kubectl, and kubezt are ready in the shell.</span>
+                        </div>
                     </div>
                 </div>
                 <div class="visual-copy">
                     <h2>Access without local guesswork.</h2>
-                    <p>The bind tool pulls the cluster-specific files, validates the kubeconfig, sets the active context, and leaves the developer ready to run <strong>kubezt status</strong> or <strong>kubectl get nodes</strong>.</p>
+                    <p>Bind downloads the cluster-specific files, validates the kubeconfig, and leaves the developer ready to run <strong>kubezt status</strong> or <strong>kubectl get nodes</strong>.</p>
                 </div>
             </aside>
 
