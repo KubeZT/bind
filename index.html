@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>KubeZT Bind | Developer Onboarding</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
         :root {
             --deep: #06135f;
@@ -84,10 +85,7 @@
         }
 
         header {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 24px;
-            align-items: start;
+            display: block;
         }
 
         .brand {
@@ -100,11 +98,18 @@
             letter-spacing: -0.02em;
         }
 
+        .brand .reg {
+            font-size: 0.38em;
+            vertical-align: super;
+            margin-left: 0.02em;
+            letter-spacing: 0;
+        }
+
         .mark {
             display: grid;
             place-items: center;
-            width: 48px;
-            height: 48px;
+            width: 46px;
+            height: 46px;
             border-radius: 13px;
             color: #ffffff;
             background: linear-gradient(135deg, var(--deep), var(--blue) 55%, var(--cyan));
@@ -114,22 +119,24 @@
         }
 
         .eyebrow {
-            align-self: center;
-            color: var(--blue);
-            font-size: clamp(11px, 0.85vw, 14px);
-            font-weight: 900;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            white-space: nowrap;
+            display: none;
         }
 
         h1 {
             margin: 0;
-            max-width: 760px;
+            max-width: 100%;
             font-size: clamp(42px, 4.1vw, 66px);
             line-height: 0.98;
             letter-spacing: -0.045em;
             color: var(--deep);
+        }
+
+        .reg {
+            font-size: 0.34em;
+            line-height: 0;
+            vertical-align: super;
+            margin-left: 0.04em;
+            letter-spacing: 0;
         }
 
         .lede {
@@ -190,27 +197,27 @@
         .bind-flow {
             align-self: center;
             display: grid;
-            gap: 16px;
+            gap: 10px;
         }
 
         .flow-item {
             display: grid;
-            grid-template-columns: 54px 1fr;
-            gap: 16px;
+            grid-template-columns: 46px 1fr;
+            gap: 13px;
             align-items: center;
-            padding: 16px;
-            border-radius: 18px;
+            padding: 12px 14px;
+            border-radius: 16px;
             background: rgba(255, 255, 255, 0.78);
             border: 1px solid rgba(21, 88, 255, 0.16);
-            box-shadow: 0 14px 32px rgba(14, 38, 122, 0.08);
+            box-shadow: 0 12px 28px rgba(14, 38, 122, 0.07);
         }
 
         .flow-icon {
             display: grid;
             place-items: center;
-            width: 54px;
-            height: 54px;
-            border-radius: 16px;
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
             color: var(--blue);
             background: #ffffff;
             border: 1px solid rgba(21, 88, 255, 0.16);
@@ -221,28 +228,25 @@
             background: linear-gradient(135deg, var(--deep), var(--blue));
         }
 
-        .flow-icon svg {
-            width: 28px;
-            height: 28px;
-            stroke: currentColor;
-            stroke-width: 1.9;
-            fill: none;
+        .flow-icon i {
+            font-size: 20px;
+            line-height: 1;
         }
 
         .flow-copy strong {
             display: block;
             color: var(--deep);
-            font-size: 17px;
+            font-size: 15px;
             line-height: 1.1;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             text-transform: uppercase;
         }
 
         .flow-copy span {
             display: block;
             color: var(--ink);
-            font-size: 14px;
-            line-height: 1.35;
+            font-size: 13px;
+            line-height: 1.28;
             font-weight: 600;
         }
 
@@ -319,6 +323,129 @@
             text-transform: uppercase;
         }
 
+        .workflow {
+            display: grid;
+            gap: 13px;
+        }
+
+        .workflow-row {
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr);
+            grid-template-areas:
+                ". label"
+                "number control";
+            gap: 14px;
+            row-gap: 8px;
+            align-items: center;
+        }
+
+        .step-number {
+            display: grid;
+            place-items: center;
+            grid-area: number;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            color: #06135f;
+            background: #a9e9ff;
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+
+        .workflow-content {
+            min-width: 0;
+            display: contents;
+        }
+
+        .control-label,
+        .command-step-label {
+            grid-area: label;
+            display: flex;
+            align-items: center;
+            color: #a9e9ff;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .environment-options {
+            grid-area: control;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .environment-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 0;
+            min-height: 46px;
+            border: 1px solid rgba(255,255,255,0.24);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.84);
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .environment-option:hover {
+            transform: translateY(-1px);
+            border-color: rgba(169, 233, 255, 0.6);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .environment-option[aria-pressed="true"] {
+            color: #06135f;
+            border-color: #a9e9ff;
+            background: #a9e9ff;
+        }
+
+        .environment-option i {
+            width: 18px;
+            font-size: 18px;
+            line-height: 1;
+            text-align: center;
+            flex: 0 0 auto;
+        }
+
+        .workflow-content input {
+            grid-area: control;
+            width: 100%;
+            min-width: 0;
+            border: 1px solid rgba(255,255,255,0.26);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            font: 800 clamp(13px, 0.95vw, 16px) "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        }
+
+        .workflow-content input::placeholder {
+            color: rgba(255,255,255,0.62);
+        }
+
+        .workflow-content input:focus {
+            border-color: rgba(169, 233, 255, 0.82);
+            box-shadow: 0 0 0 4px rgba(0, 199, 255, 0.12);
+        }
+
+        .command-row {
+            grid-area: control;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 48px;
+            gap: 12px;
+            align-items: stretch;
+        }
+
         code {
             display: block;
             padding: 16px 20px;
@@ -327,9 +454,47 @@
             background: rgba(0, 0, 0, 0.2);
             color: #ffffff;
             font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-            font-size: clamp(13px, 0.95vw, 16px);
+            font-size: clamp(12px, 0.82vw, 14px);
             line-height: 1.55;
             white-space: pre-wrap;
+        }
+
+        .copy-button {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 14px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(169, 233, 255, 0.6);
+        }
+
+        .copy-button svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 1.9;
+            fill: none;
+        }
+
+        .copy-status {
+            min-height: 18px;
+            margin-top: 9px;
+            color: #a9e9ff;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-align: right;
+            text-transform: uppercase;
+            transition: opacity 0.18s ease;
         }
 
         .lower {
@@ -398,18 +563,22 @@
                 padding: 28px;
             }
 
-            header,
             .main,
             .lower {
                 grid-template-columns: 1fr;
             }
 
-            .eyebrow {
-                justify-self: start;
-            }
-
             .steps {
                 grid-template-columns: 1fr;
+            }
+
+            .command-row {
+                grid-template-columns: 1fr;
+            }
+
+            .copy-button {
+                width: 100%;
+                height: 44px;
             }
 
             .visual {
@@ -458,29 +627,55 @@
     <section class="content">
         <header>
             <div>
-                <div class="brand"><div class="mark">ZT</div><div>KubeZT</div></div>
-                <h1>Get bound to a KubeZT cluster.</h1>
-                <p class="lede">Bind turns a new workstation into a cluster-ready developer environment: identity-based network access, approved artifacts, kubeconfig, kubectl, and the KubeZT command line in one guided flow.</p>
+                <div class="brand"><div class="mark">ZT</div><div>KubeZT<span class="reg">&reg;</span></div></div>
+                <h1>Get bound to a KubeZT<span class="reg">&reg;</span> cluster.</h1>
+                <p class="lede">Bind turns your developer workstation into a cluster-ready developer environment: identity-based network access, approved artifacts, kubeconfig, kubectl, and the KubeZT command line in one guided flow.</p>
             </div>
-            <div class="eyebrow">Developer Cluster Onboarding</div>
         </header>
 
         <section class="main">
             <aside class="visual">
-                <div class="mini-title">Bind Flow</div>
+                <div class="mini-title">Before You Bind</div>
                 <div class="bind-flow">
                     <div class="flow-item">
                         <div class="flow-icon">
-                            <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M8 20h8M10 16v4M14 16v4"></path></svg>
+                            <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
                         </div>
                         <div class="flow-copy">
-                            <strong>Workstation</strong>
-                            <span>Developer terminal with OpenZiti identity available.</span>
+                            <strong>Cluster Identity</strong>
+                            <span>Get the zero trust identity for the cluster with the admin role assigned.</span>
                         </div>
                     </div>
                     <div class="flow-item">
                         <div class="flow-icon">
-                            <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.2-2.8 7.5-7 9-4.2-1.5-7-4.8-7-9V7l7-4z"></path><path d="M9.5 12.5l1.8 1.8 3.7-4.1"></path></svg>
+                            <i class="fa-solid fa-key" aria-hidden="true"></i>
+                        </div>
+                        <div class="flow-copy">
+                            <strong>Artifact Keys</strong>
+                            <span>Have the AWS access key ID and secret provided by your administrator.</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-icon">
+                            <i class="fa-solid fa-tag" aria-hidden="true"></i>
+                        </div>
+                        <div class="flow-copy">
+                            <strong>Cluster Name</strong>
+                            <span>Use the exact cluster name provided by your administrator.</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-icon">
+                            <i class="fa-solid fa-display" aria-hidden="true"></i>
+                        </div>
+                        <div class="flow-copy">
+                            <strong>Workstation</strong>
+                            <span>Use Bash or Zsh on macOS or Linux, or PowerShell on Windows.</span>
+                        </div>
+                    </div>
+                    <div class="flow-item">
+                        <div class="flow-icon">
+                            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
                         </div>
                         <div class="flow-copy">
                             <strong>Verified Access</strong>
@@ -489,7 +684,7 @@
                     </div>
                     <div class="flow-item">
                         <div class="flow-icon primary">
-                            <svg viewBox="0 0 24 24"><path d="M12 3l7.5 4.3v8.4L12 20l-7.5-4.3V7.3L12 3z"></path><path d="M12 8v8M8.5 10l7 4M15.5 10l-7 4"></path></svg>
+                            <i class="fa-solid fa-cubes" aria-hidden="true"></i>
                         </div>
                         <div class="flow-copy">
                             <strong>Active Cluster</strong>
@@ -497,18 +692,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="visual-copy">
-                    <h2>Access without local guesswork.</h2>
-                    <p>Bind downloads the cluster-specific files, validates the kubeconfig, and leaves the developer ready to run <strong>kubezt status</strong> or <strong>kubectl get nodes</strong>.</p>
-                </div>
             </aside>
 
             <section class="right">
                 <div class="steps">
                     <div class="card">
                         <div class="num">01</div>
-                        <h3>Install OpenZiti</h3>
-                        <p>Install the client for your platform so private KubeZT endpoints are reachable from your workstation.</p>
+                        <h3>Install Client</h3>
+                        <p>Install the zero trust client for your platform so private KubeZT endpoints are reachable from your workstation.</p>
                     </div>
                     <div class="card">
                         <div class="num">02</div>
@@ -523,31 +714,49 @@
                 </div>
 
                 <div class="command">
-                    <div class="command-label">Developer Command</div>
-                    <code>source &lt;(curl -fsSL https://bind.kubezt.com) &lt;cluster-name&gt;
-                        kubezt status
-                        kubectl get nodes</code>
-                </div>
-
-                <div class="lower">
-                    <div class="card">
-                        <h3>What Bind Sets Up</h3>
-                        <ul>
-                            <li>A named AWS profile for cluster artifact downloads.</li>
-                            <li>Cluster files under <strong>~/.kubezt/clusters/&lt;cluster&gt;</strong>.</li>
-                            <li><strong>KUBECONFIG</strong> pointed at the downloaded cluster config.</li>
-                            <li>The <strong>kubezt</strong> command and compatible local kubectl tooling.</li>
-                        </ul>
+                    <div class="command-label">Generate Your Bind Command</div>
+                    <div class="workflow">
+                        <div class="workflow-row">
+                            <div class="step-number">1</div>
+                            <div class="workflow-content">
+                                <div class="control-label">Select Environment</div>
+                                <div class="environment-options" role="group" aria-label="Select environment">
+                                    <button class="environment-option" type="button" data-environment="windows" aria-pressed="false">
+                                        <i class="fa-brands fa-windows" aria-hidden="true"></i>
+                                        Windows
+                                    </button>
+                                    <button class="environment-option" type="button" data-environment="mac" aria-pressed="true">
+                                        <i class="fa-brands fa-apple" aria-hidden="true"></i>
+                                        Mac
+                                    </button>
+                                    <button class="environment-option" type="button" data-environment="linux" aria-pressed="false">
+                                        <i class="fa-brands fa-linux" aria-hidden="true"></i>
+                                        Linux
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="workflow-row">
+                            <div class="step-number">2</div>
+                            <div class="workflow-content">
+                                <label class="control-label" for="clusterName">Enter Cluster Name</label>
+                                <input id="clusterName" type="text" autocomplete="off" spellcheck="false" placeholder="cluster-name">
+                            </div>
+                        </div>
+                        <div class="workflow-row">
+                            <div class="step-number">3</div>
+                            <div class="workflow-content">
+                                <div class="command-step-label">Copy Bind Command</div>
+                                <div class="command-row">
+                                    <code id="bindCommand">source &lt;(curl -fsSL https://bind.kubezt.com/bind.sh) &lt;cluster-name&gt;</code>
+                                    <button class="copy-button" id="copyCommand" type="button" aria-label="Copy bind command">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="10" height="10" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card">
-                        <h3>What You Need</h3>
-                        <ul>
-                            <li>OpenZiti client installed and running.</li>
-                            <li>Your enrolled KubeZT identity on the workstation.</li>
-                            <li>The cluster name and artifact access keys from your administrator.</li>
-                            <li>Bash or Zsh on macOS or Linux.</li>
-                        </ul>
-                    </div>
+                    <div class="copy-status" id="copyStatus" aria-live="polite"></div>
                 </div>
             </section>
         </section>
@@ -555,9 +764,77 @@
         <footer>
             <div class="tagline">Independent. Secure. Interoperable.</div>
             <div class="rule"></div>
-            <div>Bind gives developers a repeatable path from identity to working Kubernetes access.</div>
+            <div>Copyright &copy; Analytics HQ, LLC. All rights reserved.</div>
         </footer>
     </section>
 </main>
+<script>
+    const clusterInput = document.getElementById("clusterName");
+    const bindCommand = document.getElementById("bindCommand");
+    const copyButton = document.getElementById("copyCommand");
+    const copyStatus = document.getElementById("copyStatus");
+    const environmentButtons = Array.from(document.querySelectorAll("[data-environment]"));
+    const placeholder = "<cluster-name>";
+    let selectedEnvironment = "mac";
+    let statusTimer;
+
+    function currentCommand() {
+        const value = clusterInput.value.trim();
+        const cluster = value || placeholder;
+        if (selectedEnvironment === "windows") {
+            return `irm https://bind.kubezt.com/bind.ps1 | iex; Bind-KubeZT -ClusterName ${cluster}`;
+        }
+        return `source <(curl -fsSL https://bind.kubezt.com/bind.sh) ${cluster}`;
+    }
+
+    function renderCommand() {
+        bindCommand.textContent = currentCommand();
+        showStatus("");
+    }
+
+    function showStatus(message) {
+        clearTimeout(statusTimer);
+        copyStatus.textContent = message;
+        copyStatus.style.opacity = message ? "1" : "0";
+        if (message) {
+            statusTimer = setTimeout(() => {
+                copyStatus.style.opacity = "0";
+                setTimeout(() => {
+                    copyStatus.textContent = "";
+                }, 180);
+            }, 2600);
+        }
+    }
+
+    function selectEnvironment(environment) {
+        selectedEnvironment = environment;
+        environmentButtons.forEach((button) => {
+            button.setAttribute("aria-pressed", String(button.dataset.environment === environment));
+        });
+        renderCommand();
+    }
+
+    async function copyCommand() {
+        const text = currentCommand();
+        try {
+            await navigator.clipboard.writeText(text);
+            showStatus("Copied to clipboard!");
+        } catch {
+            const range = document.createRange();
+            range.selectNodeContents(bindCommand);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            showStatus("Command selected");
+        }
+    }
+
+    clusterInput.addEventListener("input", renderCommand);
+    copyButton.addEventListener("click", copyCommand);
+    environmentButtons.forEach((button) => {
+        button.addEventListener("click", () => selectEnvironment(button.dataset.environment));
+    });
+    renderCommand();
+</script>
 </body>
 </html>
