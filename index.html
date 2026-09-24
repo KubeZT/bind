@@ -152,7 +152,7 @@
             display: grid;
             grid-template-columns: minmax(340px, 0.82fr) minmax(560px, 1.35fr);
             gap: clamp(18px, 2.2vw, 30px);
-            align-items: stretch;
+            align-items: start;
         }
 
         .visual,
@@ -166,7 +166,8 @@
 
         .visual {
             position: relative;
-            min-height: 440px;
+            height: 620px;
+            min-height: 0;
             border-radius: 20px;
             padding: clamp(22px, 2vw, 30px);
             overflow: hidden;
@@ -582,6 +583,7 @@
             }
 
             .visual {
+                height: auto;
                 min-height: 470px;
             }
 
