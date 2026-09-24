@@ -1,442 +1,537 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KubeZT Bind | Developer Cluster Onboarding</title>
-  <style>
-    @page {
-      size: letter landscape;
-      margin: 0;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KubeZT Bind | Developer Onboarding</title>
+    <style>
+        :root {
+            --deep: #06135f;
+            --blue: #1558ff;
+            --cyan: #00c7ff;
+            --ink: #17277a;
+            --muted: #4050a0;
+            --line: rgba(70, 116, 255, 0.18);
+            --card: rgba(255, 255, 255, 0.84);
+            --shadow: 0 26px 70px rgba(14, 38, 122, 0.12);
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-      margin: 0;
-      background: #eef5ff;
-      color: #07145d;
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
-    }
+        html,
+        body {
+            min-height: 100%;
+            margin: 0;
+            color: var(--deep);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: #edf5ff;
+        }
 
-    .page {
-      position: relative;
-      width: 11in;
-      height: 8.5in;
-      overflow: hidden;
-      padding: 0.42in 0.5in;
-      background:
-        radial-gradient(circle at 52% 37%, rgba(32, 93, 255, 0.15), transparent 24%),
-        radial-gradient(circle at 12% 88%, rgba(16, 202, 255, 0.18), transparent 26%),
-        linear-gradient(135deg, #ffffff 0%, #f5f9ff 54%, #eef6ff 100%);
-    }
+        body {
+            display: flex;
+            align-items: stretch;
+        }
 
-    .page::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(20, 89, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(20, 89, 255, 0.08) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: radial-gradient(circle at 50% 48%, black 0%, transparent 65%);
-      opacity: 0.55;
-    }
+        .sheet {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            padding: clamp(32px, 4vw, 66px);
+            background:
+                    radial-gradient(circle at 78% 10%, rgba(0, 199, 255, 0.18), transparent 30%),
+                    radial-gradient(circle at 14% 84%, rgba(21, 88, 255, 0.15), transparent 28%),
+                    linear-gradient(135deg, #ffffff 0%, #f7fbff 50%, #eaf3ff 100%);
+        }
 
-    .page::after {
-      content: "";
-      position: absolute;
-      left: -0.55in;
-      bottom: -0.8in;
-      width: 5.1in;
-      height: 3.5in;
-      border-radius: 50%;
-      border: 1px solid rgba(44, 113, 255, 0.18);
-      box-shadow:
-        0 0 0 18px rgba(61, 125, 255, 0.04),
-        0 0 0 42px rgba(61, 125, 255, 0.035),
-        0 0 80px rgba(18, 86, 255, 0.18);
-    }
+        .sheet::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                    linear-gradient(rgba(21, 88, 255, 0.07) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(21, 88, 255, 0.07) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(90deg, transparent, black 10%, black 72%, transparent);
+            opacity: 0.65;
+        }
 
-    .content {
-      position: relative;
-      z-index: 1;
-      height: 100%;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 0.24in;
-    }
+        .sheet::after {
+            content: "";
+            position: absolute;
+            inset: auto -16vw -18vw -12vw;
+            height: 34vw;
+            min-height: 360px;
+            border-radius: 50%;
+            border: 1px solid rgba(21, 88, 255, 0.14);
+            box-shadow:
+                    0 0 0 24px rgba(21, 88, 255, 0.035),
+                    0 0 0 58px rgba(0, 199, 255, 0.035),
+                    0 -40px 90px rgba(21, 88, 255, 0.1);
+        }
 
-    .topline {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.3in;
-    }
+        .content {
+            position: relative;
+            z-index: 1;
+            max-width: 1480px;
+            min-height: calc(100vh - clamp(64px, 8vw, 132px));
+            margin: 0 auto;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: clamp(22px, 3vw, 42px);
+        }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.14in;
-      font-weight: 900;
-      letter-spacing: 0.01em;
-      color: #07145d;
-      font-size: 0.25in;
-    }
+        header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 32px;
+            align-items: start;
+        }
 
-    .mark {
-      width: 0.42in;
-      height: 0.42in;
-      border-radius: 0.12in;
-      display: grid;
-      place-items: center;
-      color: #ffffff;
-      background: linear-gradient(135deg, #07145d, #1459ff 56%, #00c7ff);
-      box-shadow: 0 16px 30px rgba(20, 89, 255, 0.25);
-      font-weight: 900;
-      font-size: 0.19in;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            font-size: clamp(28px, 2.2vw, 38px);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
 
-    .eyebrow {
-      color: #185aff;
-      font-size: 0.105in;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-    }
+        .mark {
+            display: grid;
+            place-items: center;
+            width: 58px;
+            height: 58px;
+            border-radius: 15px;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--deep), var(--blue) 55%, var(--cyan));
+            box-shadow: 0 18px 36px rgba(21, 88, 255, 0.26);
+            font-size: 28px;
+            font-weight: 900;
+        }
 
-    h1 {
-      margin: 0.05in 0 0;
-      max-width: 7.25in;
-      color: #05105a;
-      font-size: 0.47in;
-      line-height: 0.95;
-      letter-spacing: -0.01em;
-    }
+        .eyebrow {
+            align-self: center;
+            color: var(--blue);
+            font-size: clamp(13px, 1vw, 16px);
+            font-weight: 900;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
 
-    .subhead {
-      margin: 0.12in 0 0;
-      max-width: 7.2in;
-      color: #1a2a81;
-      font-size: 0.16in;
-      line-height: 1.38;
-      font-weight: 520;
-    }
+        h1 {
+            margin: 0;
+            max-width: 930px;
+            font-size: clamp(54px, 5.4vw, 96px);
+            line-height: 0.95;
+            letter-spacing: -0.045em;
+            color: var(--deep);
+        }
 
-    .main {
-      display: grid;
-      grid-template-columns: 3.2in 1fr;
-      gap: 0.28in;
-      align-items: stretch;
-    }
+        .lede {
+            max-width: 840px;
+            margin: 24px 0 0;
+            color: var(--ink);
+            font-size: clamp(20px, 1.55vw, 27px);
+            line-height: 1.34;
+            font-weight: 750;
+        }
 
-    .hero-card,
-    .panel,
-    .command {
-      border: 1px solid rgba(62, 107, 255, 0.18);
-      background: rgba(255, 255, 255, 0.78);
-      box-shadow: 0 20px 45px rgba(19, 47, 132, 0.10);
-      backdrop-filter: blur(10px);
-    }
+        .main {
+            display: grid;
+            grid-template-columns: minmax(430px, 0.88fr) minmax(620px, 1.35fr);
+            gap: clamp(24px, 3vw, 44px);
+            align-items: stretch;
+        }
 
-    .hero-card {
-      position: relative;
-      min-height: 5.04in;
-      padding: 0.28in;
-      border-radius: 0.18in;
-      overflow: hidden;
-    }
+        .visual,
+        .card,
+        .command {
+            border: 1px solid var(--line);
+            background: var(--card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
 
-    .orb {
-      position: absolute;
-      left: 0.36in;
-      top: 0.36in;
-      width: 2.4in;
-      height: 2.4in;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.94), rgba(222,237,255,0.64) 58%, rgba(20,89,255,0.12) 100%);
-      border: 1px solid rgba(20, 89, 255, 0.2);
-      box-shadow: inset 0 0 55px rgba(20, 89, 255, 0.14), 0 22px 60px rgba(20, 89, 255, 0.16);
-    }
+        .visual {
+            position: relative;
+            min-height: 520px;
+            border-radius: 24px;
+            padding: clamp(28px, 3vw, 44px);
+            overflow: hidden;
+        }
 
-    .orb::before,
-    .orb::after {
-      content: "";
-      position: absolute;
-      inset: 0.25in;
-      border-radius: 50%;
-      border: 1px dashed rgba(20, 89, 255, 0.38);
-      transform: rotate(-20deg) scaleX(1.24);
-    }
+        .visual::before {
+            content: "";
+            position: absolute;
+            inset: 12%;
+            border-radius: 50%;
+            border: 1px solid rgba(21, 88, 255, 0.13);
+            box-shadow:
+                    inset 0 0 70px rgba(21, 88, 255, 0.06),
+                    0 0 0 38px rgba(21, 88, 255, 0.025);
+        }
 
-    .orb::after {
-      transform: rotate(56deg) scaleX(1.24);
-    }
+        .nodes {
+            position: absolute;
+            inset: 0;
+        }
 
-    .stack {
-      position: absolute;
-      left: 0.66in;
-      top: 1.42in;
-      width: 1.8in;
-      height: 1.18in;
-      transform: perspective(450px) rotateX(56deg) rotateZ(-37deg);
-    }
+        .node {
+            position: absolute;
+            display: grid;
+            place-items: center;
+            width: 82px;
+            height: 82px;
+            border-radius: 24px;
+            color: var(--blue);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(21, 88, 255, 0.2);
+            box-shadow: 0 18px 42px rgba(20, 52, 150, 0.16);
+        }
 
-    .layer {
-      position: absolute;
-      width: 1.8in;
-      height: 0.52in;
-      border-radius: 0.08in;
-      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(30,94,255,0.92));
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 8px 16px rgba(18, 52, 140, 0.24);
-    }
+        .node svg {
+            width: 38px;
+            height: 38px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            fill: none;
+        }
 
-    .layer:nth-child(1) { top: 0; }
-    .layer:nth-child(2) { top: 0.26in; background: linear-gradient(135deg, rgba(232,242,255,0.95), rgba(14,52,170,0.92)); }
-    .layer:nth-child(3) { top: 0.52in; background: linear-gradient(135deg, rgba(209,239,255,0.95), rgba(6,23,90,0.94)); }
+        .node.workstation { left: 15%; top: 21%; }
+        .node.identity { right: 14%; top: 18%; color: #04a9dd; }
+        .node.cluster { left: 50%; top: 48%; transform: translate(-50%, -50%); width: 112px; height: 112px; border-radius: 30px; color: #ffffff; background: linear-gradient(135deg, var(--deep), var(--blue)); }
+        .node.config { left: 18%; bottom: 18%; color: #1558ff; }
+        .node.kubectl { right: 16%; bottom: 17%; color: #05a9d8; }
 
-    .hero-copy {
-      position: absolute;
-      left: 0.28in;
-      right: 0.28in;
-      bottom: 0.28in;
-    }
+        .link {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(21, 88, 255, 0.05), rgba(21, 88, 255, 0.48), rgba(0, 199, 255, 0.06));
+            transform-origin: left center;
+        }
 
-    .hero-copy h2 {
-      margin: 0 0 0.07in;
-      font-size: 0.21in;
-      color: #07145d;
-      line-height: 1.1;
-    }
+        .link.one { left: 26%; top: 31%; width: 34%; transform: rotate(19deg); }
+        .link.two { left: 52%; top: 42%; width: 31%; transform: rotate(-23deg); }
+        .link.three { left: 28%; bottom: 29%; width: 29%; transform: rotate(-23deg); }
+        .link.four { left: 53%; bottom: 32%; width: 29%; transform: rotate(18deg); }
 
-    .hero-copy p {
-      margin: 0;
-      color: #243488;
-      font-size: 0.12in;
-      line-height: 1.43;
-    }
+        .visual-copy {
+            position: absolute;
+            left: clamp(28px, 3vw, 44px);
+            right: clamp(28px, 3vw, 44px);
+            bottom: clamp(28px, 3vw, 44px);
+        }
 
-    .right {
-      display: grid;
-      grid-template-rows: auto auto 1fr;
-      gap: 0.18in;
-    }
+        .visual-copy h2 {
+            max-width: 420px;
+            margin: 0 0 12px;
+            font-size: clamp(28px, 2.3vw, 39px);
+            line-height: 1.04;
+            letter-spacing: -0.02em;
+        }
 
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.15in;
-    }
+        .visual-copy p {
+            max-width: 475px;
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(16px, 1.15vw, 19px);
+            line-height: 1.45;
+            font-weight: 600;
+        }
 
-    .panel {
-      border-radius: 0.16in;
-      padding: 0.18in;
-    }
+        .right {
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            gap: 22px;
+        }
 
-    .step-num {
-      color: #185aff;
-      font-size: 0.27in;
-      line-height: 1;
-      font-weight: 900;
-    }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+        }
 
-    .panel h3 {
-      margin: 0.08in 0 0.055in;
-      color: #07145d;
-      font-size: 0.145in;
-      line-height: 1.12;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
+        .card {
+            border-radius: 22px;
+            padding: clamp(22px, 1.8vw, 30px);
+        }
 
-    .panel p {
-      margin: 0;
-      color: #243488;
-      font-size: 0.108in;
-      line-height: 1.38;
-    }
+        .num {
+            color: var(--blue);
+            font-size: clamp(38px, 3vw, 50px);
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+        }
 
-    .command {
-      border-radius: 0.16in;
-      padding: 0.18in 0.2in;
-      background: linear-gradient(135deg, rgba(5, 16, 90, 0.98), rgba(13, 66, 196, 0.95));
-      color: #ffffff;
-    }
+        h3 {
+            margin: 14px 0 8px;
+            color: var(--deep);
+            font-size: clamp(18px, 1.35vw, 23px);
+            line-height: 1.08;
+            letter-spacing: 0.01em;
+            text-transform: uppercase;
+        }
 
-    .command .label {
-      margin: 0 0 0.07in;
-      color: #9ddfff;
-      font-size: 0.105in;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
+        .card p {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(15px, 1.05vw, 17px);
+            line-height: 1.42;
+            font-weight: 560;
+        }
 
-    code {
-      display: block;
-      padding: 0.14in 0.16in;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 0.1in;
-      background: rgba(0, 0, 0, 0.18);
-      color: #ffffff;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 0.118in;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
+        .command {
+            border-radius: 24px;
+            padding: clamp(24px, 2vw, 32px);
+            color: #ffffff;
+            background: linear-gradient(135deg, #07145d, #1237a3 55%, #1558ff);
+        }
 
-    .lower {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.15in;
-    }
+        .command-label {
+            margin-bottom: 12px;
+            color: #a9e9ff;
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
 
-    .list {
-      margin: 0.1in 0 0;
-      padding: 0;
-      list-style: none;
-    }
+        code {
+            display: block;
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffffff;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: clamp(15px, 1.15vw, 19px);
+            line-height: 1.55;
+            white-space: pre-wrap;
+        }
 
-    .list li {
-      position: relative;
-      margin: 0 0 0.065in;
-      padding-left: 0.2in;
-      color: #243488;
-      font-size: 0.109in;
-      line-height: 1.3;
-    }
+        .lower {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
 
-    .list li::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0.04in;
-      width: 0.085in;
-      height: 0.085in;
-      border-radius: 50%;
-      background: #185aff;
-      box-shadow: 0 0 0 4px rgba(24, 90, 255, 0.12);
-    }
+        ul {
+            margin: 14px 0 0;
+            padding: 0;
+            list-style: none;
+        }
 
-    .footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.3in;
-      color: #31419a;
-      font-size: 0.105in;
-    }
+        li {
+            position: relative;
+            margin: 0 0 12px;
+            padding-left: 28px;
+            color: var(--ink);
+            font-size: clamp(15px, 1.02vw, 17px);
+            line-height: 1.34;
+            font-weight: 560;
+        }
 
-    .tagline {
-      color: #07145d;
-      font-weight: 900;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-    }
+        li::before {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 0.45em;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--blue);
+            box-shadow: 0 0 0 6px rgba(21, 88, 255, 0.12);
+        }
 
-    .rule {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(24,90,255,0.5), rgba(0,199,255,0.08));
-    }
+        footer {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 24px;
+            align-items: center;
+            color: var(--muted);
+            font-size: clamp(14px, 1vw, 16px);
+            font-weight: 650;
+        }
 
-    @media print {
-      body {
-        background: #ffffff;
-      }
+        .tagline {
+            color: var(--deep);
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
 
-      .page {
-        box-shadow: none;
-      }
-    }
-  </style>
+        .rule {
+            height: 1px;
+            background: linear-gradient(90deg, rgba(21,88,255,0.5), rgba(0,199,255,0.08));
+        }
+
+        strong {
+            color: var(--deep);
+        }
+
+        @media (max-width: 1080px) {
+            .sheet {
+                padding: 28px;
+            }
+
+            header,
+            .main,
+            .lower {
+                grid-template-columns: 1fr;
+            }
+
+            .eyebrow {
+                justify-self: start;
+            }
+
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .visual {
+                min-height: 470px;
+            }
+
+            footer {
+                grid-template-columns: 1fr;
+            }
+
+            .rule {
+                display: none;
+            }
+        }
+
+        @media print {
+            @page {
+                size: letter landscape;
+                margin: 0.2in;
+            }
+
+            body {
+                background: #ffffff;
+            }
+
+            .sheet {
+                min-height: auto;
+                padding: 0;
+                background: #ffffff;
+            }
+
+            .content {
+                min-height: auto;
+            }
+
+            .visual,
+            .card,
+            .command {
+                box-shadow: none;
+            }
+        }
+    </style>
 </head>
 <body>
-  <main class="page">
+<main class="sheet">
     <section class="content">
-      <header>
-        <div class="topline">
-          <div class="brand"><div class="mark">ZT</div><div>KubeZT</div></div>
-          <div class="eyebrow">Developer Cluster Onboarding</div>
-        </div>
-        <h1>Bind your workstation to a KubeZT cluster.</h1>
-        <p class="subhead">Binding prepares your local environment to reach a KubeZT enclave through verified identity, scoped artifact access, and a cluster-specific Kubernetes context.</p>
-      </header>
+        <header>
+            <div>
+                <div class="brand"><div class="mark">ZT</div><div>KubeZT</div></div>
+                <h1>Get bound to a KubeZT cluster.</h1>
+                <p class="lede">Bind turns a new workstation into a cluster-ready developer environment: identity-based network access, approved artifacts, kubeconfig, kubectl, and the KubeZT command line in one guided flow.</p>
+            </div>
+            <div class="eyebrow">Developer Cluster Onboarding</div>
+        </header>
 
-      <section class="main">
-        <aside class="hero-card">
-          <div class="orb"></div>
-          <div class="stack">
-            <div class="layer"></div>
-            <div class="layer"></div>
-            <div class="layer"></div>
-          </div>
-          <div class="hero-copy">
-            <h2>One command. One context. Ready to operate.</h2>
-            <p>The bind flow installs the local helpers it needs, downloads approved cluster artifacts, activates the kubeconfig, and exposes the KubeZT administrator command in the current terminal.</p>
-          </div>
-        </aside>
+        <section class="main">
+            <aside class="visual">
+                <div class="nodes">
+                    <div class="link one"></div>
+                    <div class="link two"></div>
+                    <div class="link three"></div>
+                    <div class="link four"></div>
+                    <div class="node workstation">
+                        <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"></rect><path d="M8 20h8M10 16v4M14 16v4"></path></svg>
+                    </div>
+                    <div class="node identity">
+                        <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.2-2.8 7.5-7 9-4.2-1.5-7-4.8-7-9V7l7-4z"></path><path d="M9.5 12.5l1.8 1.8 3.7-4.1"></path></svg>
+                    </div>
+                    <div class="node cluster">
+                        <svg viewBox="0 0 24 24"><path d="M12 3l7.5 4.3v8.4L12 20l-7.5-4.3V7.3L12 3z"></path><path d="M12 8v8M8.5 10l7 4M15.5 10l-7 4"></path></svg>
+                    </div>
+                    <div class="node config">
+                        <svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"></path><path d="M14 3v4h4M8 12h8M8 16h6"></path></svg>
+                    </div>
+                    <div class="node kubectl">
+                        <svg viewBox="0 0 24 24"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"></path></svg>
+                    </div>
+                </div>
+                <div class="visual-copy">
+                    <h2>Access without local guesswork.</h2>
+                    <p>The bind tool pulls the cluster-specific files, validates the kubeconfig, sets the active context, and leaves the developer ready to run <strong>kubezt status</strong> or <strong>kubectl get nodes</strong>.</p>
+                </div>
+            </aside>
 
-        <section class="right">
-          <div class="steps">
-            <div class="panel">
-              <div class="step-num">01</div>
-              <h3>Install OpenZiti</h3>
-              <p>Install the OpenZiti client for your platform so your workstation can reach private KubeZT services.</p>
-            </div>
-            <div class="panel">
-              <div class="step-num">02</div>
-              <h3>Enroll Identity</h3>
-              <p>Load the identity provided by your administrator and confirm the client is connected.</p>
-            </div>
-            <div class="panel">
-              <div class="step-num">03</div>
-              <h3>Run Bind</h3>
-              <p>Run the bind command, enter the access keys provided to you, and start using kubectl.</p>
-            </div>
-          </div>
+            <section class="right">
+                <div class="steps">
+                    <div class="card">
+                        <div class="num">01</div>
+                        <h3>Install OpenZiti</h3>
+                        <p>Install the client for your platform so private KubeZT endpoints are reachable from your workstation.</p>
+                    </div>
+                    <div class="card">
+                        <div class="num">02</div>
+                        <h3>Enroll Identity</h3>
+                        <p>Load the identity provided by your administrator and confirm the client is connected.</p>
+                    </div>
+                    <div class="card">
+                        <div class="num">03</div>
+                        <h3>Run Bind</h3>
+                        <p>Run the command, enter the provided artifact access keys, and activate the cluster in your shell.</p>
+                    </div>
+                </div>
 
-          <div class="command">
-            <div class="label">Activation Command</div>
-            <code>source &lt;(curl -fsSL https://bind.kubezt.com) &lt;cluster-name&gt;
-kubezt status
-kubectl get nodes</code>
-          </div>
+                <div class="command">
+                    <div class="command-label">Developer Command</div>
+                    <code>source &lt;(curl -fsSL https://bind.kubezt.com) &lt;cluster-name&gt;
+                        kubezt status
+                        kubectl get nodes</code>
+                </div>
 
-          <div class="lower">
-            <div class="panel">
-              <h3>What Bind Configures</h3>
-              <ul class="list">
-                <li>A cluster AWS profile in <strong>~/.aws/credentials</strong> when needed.</li>
-                <li>Cluster artifacts in <strong>~/.kubezt/clusters/&lt;cluster&gt;</strong>.</li>
-                <li>A local KUBECONFIG pointing at <strong>&lt;cluster&gt;.config</strong>.</li>
-                <li>The <strong>kubezt</strong> command and compatible kubectl tooling.</li>
-              </ul>
-            </div>
-            <div class="panel">
-              <h3>Before You Start</h3>
-              <ul class="list">
-                <li>OpenZiti client is installed and running.</li>
-                <li>Your identity is enrolled and available on the workstation.</li>
-                <li>You have the cluster name and read-only artifact access keys.</li>
-                <li>Your terminal is Bash or Zsh on macOS or Linux.</li>
-              </ul>
-            </div>
-          </div>
+                <div class="lower">
+                    <div class="card">
+                        <h3>What Bind Sets Up</h3>
+                        <ul>
+                            <li>A named AWS profile for cluster artifact downloads.</li>
+                            <li>Cluster files under <strong>~/.kubezt/clusters/&lt;cluster&gt;</strong>.</li>
+                            <li><strong>KUBECONFIG</strong> pointed at the downloaded cluster config.</li>
+                            <li>The <strong>kubezt</strong> command and compatible local kubectl tooling.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>What You Need</h3>
+                        <ul>
+                            <li>OpenZiti client installed and running.</li>
+                            <li>Your enrolled KubeZT identity on the workstation.</li>
+                            <li>The cluster name and artifact access keys from your administrator.</li>
+                            <li>Bash or Zsh on macOS or Linux.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
         </section>
-      </section>
 
-      <footer class="footer">
-        <div class="tagline">Independent. Secure. Interoperable.</div>
-        <div class="rule"></div>
-        <div>Bind establishes local access without exposing the cluster control plane to the open network.</div>
-      </footer>
+        <footer>
+            <div class="tagline">Independent. Secure. Interoperable.</div>
+            <div class="rule"></div>
+            <div>Bind gives developers a repeatable path from identity to working Kubernetes access.</div>
+        </footer>
     </section>
-  </main>
+</main>
 </body>
 </html>
-
